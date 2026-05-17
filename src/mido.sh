@@ -49,7 +49,7 @@ handle_curl_error() {
 
 get_agent() {
 
-  local user_agent
+  local browser_version
 
   # Determine approximate latest Firefox release
   browser_version="$((124 + ($(date +%s) - 1710892800) / 2419200))"
@@ -273,6 +273,7 @@ download_windows_eval() {
   culture=$(getLanguage "$lang" "culture")
 
   local country="${culture#*-}"
+  local iso_download_links=""
   local iso_download_page_html=""
   local url="https://www.microsoft.com/en-us/evalcenter/download-$windows_version"
 
