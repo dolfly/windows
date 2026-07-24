@@ -275,13 +275,20 @@ generateEvalXML() {
 
   local id="$1"
   local detected_index="${2:-}"
-  local source="/run/assets/${id::-5}.xml"
+  local normal="${id::-5}"
+  local source="/run/assets/$normal.xml"
   local target="/run/assets/$id.xml"
   local index="$detected_index" tmp
 
   [[ "${id,,}" == *"-eval" ]] || return 1
 
   removeGeneratedXML "$source" || return 1
+
+  if [ ! -s "$source" ]; then
+    source="/run/assets/${normal%%-*}.xml"
+    removeGeneratedXML "$source" || return 1
+  fi
+
   [ -s "$source" ] || return 1
 
   if [ -n "$index" ] && [[ ! "$index" =~ ^[1-9][0-9]*$ ]]; then
@@ -455,22 +462,6 @@ setXML() {
       return 0
     fi
   done
-
-  # Known Server editions normally share one answer file. When the image
-  # contains only one uniquely detected Server edition and no explicit
-  # EDITION was requested, generate a keyless answer file using that index.
-  if [ -n "$index" ] && [ -z "${EDITION:-}" ] &&
-    [[ "${DETECTED,,}" == win20* && "${DETECTED,,}" != *-* ]] &&
-    [ -s "$target" ]; then
-
-    file="/run/assets/$DETECTED-selected.xml"
-
-    removeGeneratedXML "$file" || return 1
-    generateFallbackXML "$DETECTED-selected" "$index" || return 1
-
-    XML="$file"
-    return 0
-  fi
 
   file="$1"
 
